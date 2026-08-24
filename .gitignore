@@ -1,0 +1,15 @@
+# Root-level only — each component's own build/dependency artifacts are
+# covered by its own .gitignore (coolculator-backend/, coolculator-ui/,
+# coolculator-docker/). Git applies nested .gitignore files correctly on
+# its own; this one is just for things that could appear anywhere in the
+# tree, not owned by any single component.
+
+# OS cruft
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editor
+.idea/
+*.swp
+*.swo

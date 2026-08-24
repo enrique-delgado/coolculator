@@ -1,0 +1,251 @@
+@import "../theme/themes.css";
+
+/* Base reset — deliberately small, not a full CSS-reset library; this app
+   has too few element types to need one. */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--fg);
+  font-family:
+    system-ui,
+    -apple-system,
+    "Segoe UI",
+    Roboto,
+    sans-serif;
+  transition:
+    background-color 0.15s ease,
+    color 0.15s ease;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+}
+
+.app {
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.app__main {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+/* ---- Header ------------------------------------------------------------ */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--border);
+  flex-wrap: wrap;
+}
+
+.header__title {
+  font-weight: 700;
+  font-size: 1.1rem;
+  margin: 0;
+}
+
+.header__controls {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.header select,
+.header button.header__button {
+  background: var(--surface);
+  color: var(--fg);
+  border: 1px solid var(--border);
+  border-radius: 0.4rem;
+  padding: 0.35rem 0.6rem;
+  cursor: pointer;
+}
+
+.header select:focus-visible,
+.header button:focus-visible,
+.key:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* ---- Calculator ---------------------------------------------------------- */
+.calculator {
+  width: min(100%, 22rem);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 1rem;
+  padding: 1rem;
+  box-shadow: 0 10px 30px rgb(0 0 0 / 0.15);
+}
+
+.display {
+  background: var(--display-bg);
+  color: var(--display-fg);
+  border-radius: 0.75rem;
+  padding: 1rem;
+  margin-bottom: 0.75rem;
+  text-align: right;
+  min-height: 5.5rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  overflow: hidden;
+}
+
+.display__pending {
+  font-size: 0.9rem;
+  opacity: 0.7;
+  min-height: 1.2em;
+}
+
+.display__value {
+  font-size: clamp(1.75rem, 8vw, 2.5rem);
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}
+
+.display__value--error {
+  font-size: 1.1rem;
+  color: var(--danger-bg);
+}
+
+.keypad {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.5rem;
+}
+
+.key {
+  border: none;
+  border-radius: 0.6rem;
+  padding: 0.85rem 0;
+  font-size: 1.1rem;
+  cursor: pointer;
+  background: var(--key-bg);
+  color: var(--key-fg);
+}
+
+.key:hover {
+  /* filter, not a background swap: .key--operator/--equals/--memory each
+     set their own background, and a plain `.key:hover { background }` rule
+     would beat them on specificity ((0,0,1,0) class vs (0,0,2,0)
+     class+pseudo-class) whichever variant is hovered — filter applies
+     uniformly on top of whatever color is already there instead. */
+  filter: brightness(0.92);
+}
+
+.key:active {
+  filter: brightness(0.85);
+  transform: translateY(1px);
+}
+
+.key--operator {
+  background: var(--operator-bg);
+  color: var(--operator-fg);
+}
+
+.key--equals {
+  background: var(--equals-bg);
+  color: var(--equals-fg);
+  font-weight: 700;
+}
+
+.key--memory {
+  background: var(--memory-bg);
+  color: var(--memory-fg);
+  font-size: 0.9rem;
+}
+
+.key--span-4 {
+  grid-column: span 4;
+}
+
+/* ---- Responsive (basic mobile support) ---------------------------------- */
+@media (max-width: 420px) {
+  .calculator {
+    border-radius: 0;
+    border-width: 1px 0;
+  }
+  .app__main {
+    padding: 0;
+  }
+  .key {
+    padding: 0.75rem 0;
+    font-size: 1rem;
+  }
+}
+
+/* ---- About dialog -------------------------------------------------------- */
+.about-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgb(0 0 0 / 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  z-index: 10;
+}
+
+.about-dialog {
+  background: var(--surface);
+  color: var(--fg);
+  border-radius: 0.75rem;
+  border: 1px solid var(--border);
+  padding: 1.5rem;
+  width: min(100%, 28rem);
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.about-dialog h2 {
+  margin-top: 0;
+}
+
+.about-dialog dl {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.35rem 0.75rem;
+  margin: 1rem 0;
+}
+
+.about-dialog dt {
+  font-weight: 600;
+  opacity: 0.75;
+}
+
+.about-dialog dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.about-dialog__close {
+  margin-top: 0.5rem;
+  background: var(--accent);
+  color: var(--equals-fg);
+  border: none;
+  border-radius: 0.5rem;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+}

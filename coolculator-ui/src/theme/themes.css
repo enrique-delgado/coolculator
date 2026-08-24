@@ -1,0 +1,168 @@
+/*
+ * Two independent axes, per docs/01-requirements.md:
+ *   [data-theme]  — light | dark
+ *   [data-scheme] — slate | graphite (sober/minimalist) | aurora | carnival (youthful/psychedelic)
+ * Every component reads colors through the custom properties below, never
+ * a literal color value — switching either attribute is a pure CSS change,
+ * no re-render or JS-computed styles involved.
+ */
+
+/* ---- Slate (sober) --------------------------------------------------- */
+[data-scheme="slate"][data-theme="light"] {
+  --bg: #f1f5f9;
+  --fg: #0f172a;
+  --surface: #ffffff;
+  --border: #cbd5e1;
+  --display-bg: #0f172a;
+  --display-fg: #f8fafc;
+  --key-bg: #e2e8f0;
+  --key-fg: #0f172a;
+  --operator-bg: #475569;
+  --operator-fg: #ffffff;
+  --equals-bg: #2563eb;
+  --equals-fg: #ffffff;
+  --memory-bg: #94a3b8;
+  --memory-fg: #0f172a;
+  --accent: #2563eb;
+  --danger-bg: #dc2626;
+  --danger-fg: #ffffff;
+}
+[data-scheme="slate"][data-theme="dark"] {
+  --bg: #0f172a;
+  --fg: #f1f5f9;
+  --surface: #1e293b;
+  --border: #334155;
+  --display-bg: #020617;
+  --display-fg: #f8fafc;
+  --key-bg: #334155;
+  --key-fg: #f1f5f9;
+  --operator-bg: #64748b;
+  --operator-fg: #ffffff;
+  --equals-bg: #3b82f6;
+  --equals-fg: #ffffff;
+  --memory-bg: #475569;
+  --memory-fg: #f1f5f9;
+  --accent: #60a5fa;
+  --danger-bg: #ef4444;
+  --danger-fg: #ffffff;
+}
+
+/* ---- Graphite (sober) -------------------------------------------------- */
+[data-scheme="graphite"][data-theme="light"] {
+  --bg: #f5f5f5;
+  --fg: #171717;
+  --surface: #ffffff;
+  --border: #d4d4d4;
+  --display-bg: #171717;
+  --display-fg: #fafafa;
+  --key-bg: #e5e5e5;
+  --key-fg: #171717;
+  --operator-bg: #525252;
+  --operator-fg: #ffffff;
+  --equals-bg: #171717;
+  --equals-fg: #ffffff;
+  --memory-bg: #a3a3a3;
+  --memory-fg: #171717;
+  --accent: #404040;
+  --danger-bg: #b91c1c;
+  --danger-fg: #ffffff;
+}
+[data-scheme="graphite"][data-theme="dark"] {
+  --bg: #171717;
+  --fg: #f5f5f5;
+  --surface: #262626;
+  --border: #404040;
+  --display-bg: #0a0a0a;
+  --display-fg: #f5f5f5;
+  --key-bg: #404040;
+  --key-fg: #f5f5f5;
+  --operator-bg: #737373;
+  --operator-fg: #171717;
+  --equals-bg: #f5f5f5;
+  --equals-fg: #171717;
+  --memory-bg: #525252;
+  --memory-fg: #f5f5f5;
+  --accent: #a3a3a3;
+  --danger-bg: #dc2626;
+  --danger-fg: #ffffff;
+}
+
+/* ---- Aurora (psychedelic) --------------------------------------------- */
+[data-scheme="aurora"][data-theme="light"] {
+  --bg: #f0fdfa;
+  --fg: #134e4a;
+  --surface: #ffffff;
+  --border: #99f6e4;
+  --display-bg: #134e4a;
+  --display-fg: #ccfbf1;
+  --key-bg: #ccfbf1;
+  --key-fg: #134e4a;
+  --operator-bg: #a855f7;
+  --operator-fg: #ffffff;
+  --equals-bg: #ec4899;
+  --equals-fg: #ffffff;
+  --memory-bg: #5eead4;
+  --memory-fg: #134e4a;
+  --accent: #d946ef;
+  --danger-bg: #f43f5e;
+  --danger-fg: #ffffff;
+}
+[data-scheme="aurora"][data-theme="dark"] {
+  --bg: #042f2e;
+  --fg: #ccfbf1;
+  --surface: #134e4a;
+  --border: #115e59;
+  --display-bg: #031f1e;
+  --display-fg: #5eead4;
+  --key-bg: #115e59;
+  --key-fg: #ccfbf1;
+  --operator-bg: #c026d3;
+  --operator-fg: #ffffff;
+  --equals-bg: #f472b6;
+  --equals-fg: #4a044e;
+  --memory-bg: #2dd4bf;
+  --memory-fg: #042f2e;
+  --accent: #e879f9;
+  --danger-bg: #fb7185;
+  --danger-fg: #4c0519;
+}
+
+/* ---- Carnival (psychedelic) --------------------------------------------- */
+[data-scheme="carnival"][data-theme="light"] {
+  --bg: #fff7ed;
+  --fg: #451a03;
+  --surface: #ffffff;
+  --border: #fdba74;
+  --display-bg: #451a03;
+  --display-fg: #fed7aa;
+  --key-bg: #fed7aa;
+  --key-fg: #451a03;
+  --operator-bg: #7c3aed;
+  --operator-fg: #ffffff;
+  --equals-bg: #f59e0b;
+  --equals-fg: #451a03;
+  --memory-bg: #fb923c;
+  --memory-fg: #451a03;
+  --accent: #db2777;
+  --danger-bg: #e11d48;
+  --danger-fg: #ffffff;
+}
+[data-scheme="carnival"][data-theme="dark"] {
+  --bg: #2a1206;
+  --fg: #ffedd5;
+  --surface: #3a1a08;
+  --border: #5a2a0f;
+  --display-bg: #180a00;
+  --display-fg: #fed7aa;
+  --key-bg: #5a2a0f;
+  --key-fg: #ffedd5;
+  --operator-bg: #a78bfa;
+  --operator-fg: #2a1206;
+  --equals-bg: #fbbf24;
+  --equals-fg: #2a1206;
+  --memory-bg: #fb923c;
+  --memory-fg: #2a1206;
+  --accent: #f472b6;
+  --danger-bg: #fb7185;
+  --danger-fg: #2a1206;
+}

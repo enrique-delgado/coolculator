@@ -1,0 +1,13 @@
+.git
+.gitignore
+bin/
+coverage.out
+*.test
+
+# Regenerated inside the build stage (go tool swag init) — never trust a
+# host copy, always build fresh.
+docs/
+
+# Documentation — irrelevant to the build, keeps the context lean.
+README.md
+AGENTS.md

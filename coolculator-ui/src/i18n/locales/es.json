@@ -1,0 +1,83 @@
+{
+  "app": {
+    "title": "coolculator"
+  },
+  "display": {
+    "ariaLabel": "Pantalla de la calculadora"
+  },
+  "keys": {
+    "clear": "C",
+    "backspace": "⌫",
+    "sqrt": "√",
+    "pow": "x^y",
+    "percentage": "%",
+    "divide": "÷",
+    "multiply": "×",
+    "subtract": "−",
+    "add": "+",
+    "equals": "=",
+    "decimal": ",",
+    "memoryClear": "MC",
+    "memoryRecall": "MR",
+    "memoryAdd": "M+",
+    "memorySubtract": "M-"
+  },
+  "keyLabels": {
+    "clear": "Borrar",
+    "backspace": "Retroceso",
+    "sqrt": "Raíz cuadrada",
+    "pow": "Potencia",
+    "percentage": "Porcentaje",
+    "divide": "Dividir",
+    "multiply": "Multiplicar",
+    "subtract": "Restar",
+    "add": "Sumar",
+    "equals": "Igual",
+    "decimal": "Punto decimal",
+    "digit": "Dígito {{digit}}",
+    "memoryClear": "Borrar memoria",
+    "memoryRecall": "Recuperar memoria",
+    "memoryAdd": "Sumar a memoria",
+    "memorySubtract": "Restar de memoria"
+  },
+  "memory": {
+    "tooltip": "Memoria: {{value}}"
+  },
+  "errors": {
+    "MALFORMED_REQUEST": "Algo salió mal al preparar la solicitud. Inténtalo de nuevo.",
+    "INVALID_OPERATION": "Esa operación no es compatible.",
+    "INVALID_OPERAND": "Ese valor no es válido para esta operación.",
+    "OPERAND_COUNT_MISMATCH": "Esa operación recibió un número incorrecto de valores.",
+    "DIVISION_BY_ZERO": "No se puede dividir entre cero.",
+    "RESULT_NOT_FINITE": "Ese resultado es demasiado grande para mostrarlo.",
+    "INTERNAL_ERROR": "Algo salió mal de nuestro lado. Inténtalo de nuevo.",
+    "NETWORK_ERROR": "No se puede conectar con el servidor. Verifica tu conexión e inténtalo de nuevo."
+  },
+  "header": {
+    "language": "Idioma",
+    "theme": "Tema",
+    "lightMode": "Modo claro",
+    "darkMode": "Modo oscuro",
+    "about": "Acerca de"
+  },
+  "themes": {
+    "slate": "Pizarra",
+    "graphite": "Grafito",
+    "aurora": "Aurora",
+    "carnival": "Carnaval"
+  },
+  "about": {
+    "title": "Acerca de coolculator",
+    "frontendVersion": "Versión del frontend",
+    "backendVersion": "Versión del backend",
+    "backendVersionLoading": "Cargando…",
+    "backendVersionUnavailable": "No disponible — backend inaccesible",
+    "repository": "Repositorio",
+    "author": "Autor",
+    "copyright": "© {{year}} coolculator. Todos los derechos reservados.",
+    "contribute": "coolculator es de código abierto — ¡los problemas, ideas y pull requests siempre son bienvenidos!",
+    "close": "Cerrar",
+    "authorNamePlaceholder": "— configura VITE_AUTHOR_NAME —",
+    "repositoryPlaceholder": "— configura VITE_GITHUB_URL —"
+  }
+}

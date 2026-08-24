@@ -1,0 +1,5 @@
+# Only .env.example is committed — an actual .env here holds nothing
+# secret (just optional build metadata), but keeping the same
+# committed-template/gitignored-local-copy pattern used in coolculator-ui
+# for consistency.
+.env

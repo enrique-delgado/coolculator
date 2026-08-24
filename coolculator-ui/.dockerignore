@@ -1,0 +1,9 @@
+.git
+.gitignore
+node_modules/
+dist/
+coverage/
+*.local
+.env.local
+README.md
+AGENTS.md

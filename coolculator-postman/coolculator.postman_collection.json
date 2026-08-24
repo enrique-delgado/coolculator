@@ -1,0 +1,622 @@
+{
+  "info": {
+    "_postman_id": "b1e2c3d4-5f6a-4b7c-8d9e-0a1b2c3d4e5f",
+    "name": "coolculator API",
+    "description": "REST API for coolculator's backend (coolculator-backend). Every request uses {{apiBaseUrl}}, defined once per environment — see the three bundled environments (local, docker, render). See ../docs/03-api-contract.md for the full written contract.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "event": [
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "pm.test('response carries an X-Request-Id header', function () {",
+          "    pm.response.to.have.header('X-Request-Id');",
+          "});"
+        ]
+      }
+    }
+  ],
+  "item": [
+    {
+      "name": "Health & Info",
+      "item": [
+        {
+          "name": "Health Check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{apiBaseUrl}}/health",
+              "host": ["{{apiBaseUrl}}"],
+              "path": ["health"]
+            },
+            "description": "Liveness probe. Also what the integration test suite and Docker's HEALTHCHECK use to confirm the service is up."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('body reports ok', function () {",
+                  "    pm.expect(pm.response.json().status).to.eql('ok');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "Info",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{apiBaseUrl}}/info",
+              "host": ["{{apiBaseUrl}}"],
+              "path": ["info"]
+            },
+            "description": "Build/version metadata — the same endpoint the frontend's About panel calls."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('body has version, commit, and builtAt', function () {",
+                  "    var body = pm.response.json();",
+                  "    pm.expect(body).to.have.property('version');",
+                  "    pm.expect(body).to.have.property('commit');",
+                  "    pm.expect(body).to.have.property('builtAt');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Calculate",
+      "item": [
+        {
+          "name": "Add",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"operation\": \"add\",\n  \"operand1\": 2,\n  \"operand2\": 3\n}"
+            },
+            "url": {
+              "raw": "{{apiBaseUrl}}/api/v1/calculate",
+              "host": ["{{apiBaseUrl}}"],
+              "path": ["api", "v1", "calculate"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('result is 5', function () {",
+                  "    pm.expect(pm.response.json().result).to.eql(5);",
+                  "});",
+                  "",
+                  "pm.test('response does not echo the request', function () {",
+                  "    var body = pm.response.json();",
+                  "    pm.expect(body).to.not.have.property('operation');",
+                  "    pm.expect(body).to.not.have.property('operand1');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "Subtract",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"operation\": \"subtract\",\n  \"operand1\": 10,\n  \"operand2\": 4\n}"
+            },
+            "url": {
+              "raw": "{{apiBaseUrl}}/api/v1/calculate",
+              "host": ["{{apiBaseUrl}}"],
+              "path": ["api", "v1", "calculate"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('result is 6', function () {",
+                  "    pm.expect(pm.response.json().result).to.eql(6);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "Multiply",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"operation\": \"multiply\",\n  \"operand1\": 6,\n  \"operand2\": 7\n}"
+            },
+            "url": {
+              "raw": "{{apiBaseUrl}}/api/v1/calculate",
+              "host": ["{{apiBaseUrl}}"],
+              "path": ["api", "v1", "calculate"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('result is 42', function () {",
+                  "    pm.expect(pm.response.json().result).to.eql(42);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "Divide",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"operation\": \"divide\",\n  \"operand1\": 10,\n  \"operand2\": 4\n}"
+            },
+            "url": {
+              "raw": "{{apiBaseUrl}}/api/v1/calculate",
+              "host": ["{{apiBaseUrl}}"],
+              "path": ["api", "v1", "calculate"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('result is 2.5', function () {",
+                  "    pm.expect(pm.response.json().result).to.eql(2.5);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "Pow",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"operation\": \"pow\",\n  \"operand1\": 2,\n  \"operand2\": 10\n}"
+            },
+            "url": {
+              "raw": "{{apiBaseUrl}}/api/v1/calculate",
+              "host": ["{{apiBaseUrl}}"],
+              "path": ["api", "v1", "calculate"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('result is 1024', function () {",
+                  "    pm.expect(pm.response.json().result).to.eql(1024);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "Sqrt",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"operation\": \"sqrt\",\n  \"operand1\": 81\n}"
+            },
+            "url": {
+              "raw": "{{apiBaseUrl}}/api/v1/calculate",
+              "host": ["{{apiBaseUrl}}"],
+              "path": ["api", "v1", "calculate"]
+            },
+            "description": "Unary operation — operand2 is omitted entirely, not just set to null."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('result is 9', function () {",
+                  "    pm.expect(pm.response.json().result).to.eql(9);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "Percentage",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"operation\": \"percentage\",\n  \"operand1\": 25,\n  \"operand2\": 200\n}"
+            },
+            "url": {
+              "raw": "{{apiBaseUrl}}/api/v1/calculate",
+              "host": ["{{apiBaseUrl}}"],
+              "path": ["api", "v1", "calculate"]
+            },
+            "description": "operand1 as a percentage of operand2: 25 is what percent of 200 -> 12.5."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('result is 12.5', function () {",
+                  "    pm.expect(pm.response.json().result).to.eql(12.5);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "Explicit Zero Operand",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"operation\": \"add\",\n  \"operand1\": 0,\n  \"operand2\": 5\n}"
+            },
+            "url": {
+              "raw": "{{apiBaseUrl}}/api/v1/calculate",
+              "host": ["{{apiBaseUrl}}"],
+              "path": ["api", "v1", "calculate"]
+            },
+            "description": "Regression check for docs/00-decisions.md D11: operand1 is a legitimate 0, not a missing value, and must be accepted."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 200 (0 is not treated as missing)', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('result is 5', function () {",
+                  "    pm.expect(pm.response.json().result).to.eql(5);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Calculate — Error Cases",
+      "item": [
+        {
+          "name": "Division By Zero",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"operation\": \"divide\",\n  \"operand1\": 10,\n  \"operand2\": 0\n}"
+            },
+            "url": {
+              "raw": "{{apiBaseUrl}}/api/v1/calculate",
+              "host": ["{{apiBaseUrl}}"],
+              "path": ["api", "v1", "calculate"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 400', function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "",
+                  "pm.test('error code is DIVISION_BY_ZERO', function () {",
+                  "    pm.expect(pm.response.json().error.code).to.eql('DIVISION_BY_ZERO');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "Negative Sqrt",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"operation\": \"sqrt\",\n  \"operand1\": -4\n}"
+            },
+            "url": {
+              "raw": "{{apiBaseUrl}}/api/v1/calculate",
+              "host": ["{{apiBaseUrl}}"],
+              "path": ["api", "v1", "calculate"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 400', function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "",
+                  "pm.test('error code is INVALID_OPERAND', function () {",
+                  "    pm.expect(pm.response.json().error.code).to.eql('INVALID_OPERAND');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "Missing Operand1",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"operation\": \"add\",\n  \"operand2\": 2\n}"
+            },
+            "url": {
+              "raw": "{{apiBaseUrl}}/api/v1/calculate",
+              "host": ["{{apiBaseUrl}}"],
+              "path": ["api", "v1", "calculate"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 400', function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "",
+                  "pm.test('error code is INVALID_OPERAND', function () {",
+                  "    pm.expect(pm.response.json().error.code).to.eql('INVALID_OPERAND');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "Unsupported Operation",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"operation\": \"modulo\",\n  \"operand1\": 1,\n  \"operand2\": 2\n}"
+            },
+            "url": {
+              "raw": "{{apiBaseUrl}}/api/v1/calculate",
+              "host": ["{{apiBaseUrl}}"],
+              "path": ["api", "v1", "calculate"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 400', function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "",
+                  "pm.test('error code is INVALID_OPERATION', function () {",
+                  "    pm.expect(pm.response.json().error.code).to.eql('INVALID_OPERATION');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "Binary Op Missing Operand2",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"operation\": \"add\",\n  \"operand1\": 1\n}"
+            },
+            "url": {
+              "raw": "{{apiBaseUrl}}/api/v1/calculate",
+              "host": ["{{apiBaseUrl}}"],
+              "path": ["api", "v1", "calculate"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 400', function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "",
+                  "pm.test('error code is OPERAND_COUNT_MISMATCH', function () {",
+                  "    pm.expect(pm.response.json().error.code).to.eql('OPERAND_COUNT_MISMATCH');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "Unary Op Given Operand2",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"operation\": \"sqrt\",\n  \"operand1\": 4,\n  \"operand2\": 2\n}"
+            },
+            "url": {
+              "raw": "{{apiBaseUrl}}/api/v1/calculate",
+              "host": ["{{apiBaseUrl}}"],
+              "path": ["api", "v1", "calculate"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 400', function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "",
+                  "pm.test('error code is OPERAND_COUNT_MISMATCH', function () {",
+                  "    pm.expect(pm.response.json().error.code).to.eql('OPERAND_COUNT_MISMATCH');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "Malformed JSON",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{ this is not valid json"
+            },
+            "url": {
+              "raw": "{{apiBaseUrl}}/api/v1/calculate",
+              "host": ["{{apiBaseUrl}}"],
+              "path": ["api", "v1", "calculate"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 400', function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "",
+                  "pm.test('error code is MALFORMED_REQUEST', function () {",
+                  "    pm.expect(pm.response.json().error.code).to.eql('MALFORMED_REQUEST');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "response": []
+        }
+      ]
+    }
+  ]
+}

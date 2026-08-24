@@ -1,0 +1,64 @@
+# Decisions Log (ADR-lite)
+
+Short, numbered decisions: context → decision → rationale → alternatives. Update this file whenever a decision changes instead of losing the history.
+
+## D1 — Scope: ship the core first, defer heavier infrastructure to a backlog
+**Context:** the initial requirements discussion for coolculator mixed core functional/non-functional needs (a working, cleanly architected, well-tested calculator) with a much larger wishlist (full Hexagonal/DDD, a full observability stack, a BDD-style API test suite, multi-cloud serverless deployment, deep i18n, and validated scalability to very high request volumes).
+**Decision:** build the core functional + non-functional scope first, using clean/lite-hexagonal layering and idiomatic testing throughout. Defer the heavier infrastructure items (full observability stack, FaaS deployment, load testing, etc.) to the "Phase 2 backlog" in [`06-roadmap.md`](06-roadmap.md), so they're sequenced rather than dropped.
+**Rationale:** keeps the first version focused and reviewable without over-engineering a domain this size on day one. The architecture stays layered/testable throughout, so Phase 2 items can be added later without a rewrite.
+
+## D2 — API integration tests: Go `httptest` + `testify`
+**Decision:** implement the API-level integration test suite as Go tests using `net/http/httptest` + `testify`, spinning up the real router in-process and asserting on `/health` and `/api/v1/calculate` (happy path + edge cases). Run via `go test ./test/integration/... -tags=integration`, immediately after unit tests (`go test ./...`) in `make test` and in CI.
+**Rationale:** idiomatic Go, no new DSL/framework to maintain — and it's the option chosen over the alternative below.
+**Alternatives considered:** reuse the Postman collection via Newman in CI (kept as an *optional* post-deploy smoke check, see D4); Godog — Go's implementation of Cucumber, giving readable `Given/When/Then` (BDD-style, Gherkin syntax) scenarios — considered for its readability, but a new dependency/DSL to maintain; not chosen.
+
+## D3 — Calculator memory (M+/M−/MR/MC): client-side only
+**Decision:** memory state lives in React state (optionally mirrored to `localStorage` for persistence across reloads) — not on the backend.
+**Rationale:** standard calculator UX; keeps the backend fully stateless and trivially thread-safe with no session handling. Chosen over backend-persisted-per-session.
+**Note:** deliberate, scoped exception to "all math executed in backend" — memory is UI state, not a math operation. The operations themselves (add/subtract/multiply/divide/...) always call the backend.
+
+## D4 — Deployment target: containerized classic deploy everywhere, no FaaS
+**Decision:** one Docker image per component, runnable identically via `docker run`, `docker-compose`, Render.com (as a Docker-based web service), and any major cloud's container runtime (Cloud Run / App Runner / Container Apps).
+**Rationale:** chosen over true FaaS (e.g. AWS Lambda) to avoid handler-adapter/cold-start complexity that doesn't serve a calculator's needs. Render's container hosting satisfies the "serverless" ask; a Lambda adapter is listed in the Phase 2 backlog if you want it later.
+
+## D5 — Backend error messages: locale-agnostic codes, not translated strings
+**Decision:** the API returns stable, machine-readable error codes + parameters, e.g. `{"error": {"code": "DIVISION_BY_ZERO", "params": {}}}`, never pre-translated text. The frontend's i18n layer (`react-i18next`) owns all user-facing text in `en`/`es`, keyed by these codes.
+**Rationale:** keeps the API contract locale-agnostic (idiomatic REST practice), avoids duplicating an i18n system on both sides, and matches "message texts live in an i18n file" naturally where the UI text actually renders.
+
+## D6 — Folder naming: keep as specified
+**Decision:** keep `coolculator-ui`, `coolculator-backend`, `coolculator-docker`, `coolculator-postman` exactly as originally specified for the project.
+**Rationale:** not actually non-idiomatic, just generic — changing it has no functional benefit. Can rename later (e.g. `coolculator-web` / `coolculator-api`) with a simple find/replace if you want.
+
+## D7 — `AGENTS.md`: thin root + one scoped file per component
+**Decision:** the root `AGENTS.md` only orients and links out; each of the four sub-folders gets its own self-contained `AGENTS.md`. Details in [`07-agents-and-tooling.md`](07-agents-and-tooling.md).
+**Rationale:** matches your stated goal of separation of concerns across genuinely different sub-projects sharing one root.
+
+## D8 — Request ID header: `X-Request-Id`, generated if absent
+**Decision:** middleware honors an incoming `X-Request-Id` header if the caller supplies one, otherwise generates an ID at the edge. The ID is echoed on the response header, carried via `context.Context`, and attached to every `slog` line for that request.
+**Rationale:** there's no formal RFC-backed standard for a single-service request ID; `X-Request-Id` and `X-Correlation-Id` are both de facto conventions. `X-Request-Id` was chosen because it matches this project's shape (one service, not a chain of services — `X-Correlation-Id`'s implied use case), and because `chi` ships most of this behavior via `middleware.RequestID`.
+**Implementation note:** two corrections found while implementing. (1) `chi`'s `middleware.RequestID` generates its own collision-resistant ID scheme (`hostname/random-000001`), not a UUID — kept as-is rather than adding a UUID dependency for no functional benefit. (2) `middleware.RequestID` only stores the ID in `context.Context`; it does **not** write the response header itself, so a small additional middleware (`internal/http/middleware.EchoRequestID`, ~5 lines) is needed to actually echo it back — "no custom code needed" undersold this by one small file.
+**Alternative considered:** `X-Correlation-Id` (common in enterprise/service-mesh setups, implies multi-service chaining — not this project's shape yet); W3C Trace Context (`traceparent`) — the actual formal, vendor-neutral standard, but built for distributed tracing (trace-id + span-id + flags) and part of the OpenTelemetry stack deferred in the Phase 2 backlog. `traceparent` is the natural upgrade path if/when that lands.
+
+## D9 — Router: `chi`
+**Decision:** use `github.com/go-chi/chi` as the backend's HTTP router, rather than the stdlib `net/http.ServeMux`.
+**Rationale:** the project's own route count doesn't strictly need it (Go 1.22+'s stdlib mux now handles path params/method matching too), but it's a deliberate choice for exposure to a widely-used, idiomatic pattern in the Go ecosystem — composable middleware chaining, route grouping/nesting, and built-in middleware (`middleware.RequestID`, `Recoverer`, `Logger`) that would otherwise be hand-rolled. Chosen as a learning goal, not a strict necessity — noted explicitly so the reasoning isn't lost.
+**Alternative considered:** stdlib `net/http.ServeMux` alone — sufficient for this route count, but skips the ecosystem exposure that's part of the point here.
+
+## D10 — Document `X-Request-Id` in Swagger via per-handler annotations
+**Context:** `swaggo/swag` generates the OpenAPI spec by statically parsing doc-comments on handler functions; it has no visibility into what middleware does to a request/response. `X-Request-Id` (D8) is set by `chi`'s `middleware.RequestID`, wrapping every route — not code inside any individual handler — so it wouldn't appear in the generated spec by default.
+**Decision:** explicitly annotate each handler (`@Param ... header`, `@Header <status> ...`) so the header shows up as accepted-on-request and present-on-response in the generated Swagger UI, rather than leaving it undocumented there and relying on `03-api-contract.md`/the README alone.
+**Rationale:** OpenAPI 2.0 (swaggo's output format) has no "applies to every operation" construct — there's no way to declare a cross-cutting header once. At only three endpoints, the per-handler repetition (~2 lines each) is cheap, and it means anyone consulting the live Swagger UI — not just this doc set — sees accurate, complete behavior.
+**Revisit if:** the endpoint count grows enough that the duplication becomes real maintenance burden — at that point, falling back to documenting cross-cutting headers in prose (API-level description) instead of per-operation is reasonable.
+
+## D11 — `operand1`/`operand2` as flat pointer fields, not an array
+**Context:** the original draft modeled the request as `operands: []float64`. Three problems surfaced on review: (1) Go's `encoding/json` already rejects non-numeric array elements at decode time — free, but arity (how many elements are valid) depends on `operation`'s value, which is conditional/cross-field logic no declarative tag can express; (2) OpenAPI 2.0 (swaggo's output) can't express that conditional arity in the generated schema either — same static-schema limitation as D10; (3) positional array elements are ambiguous for non-commutative operations (is `operands[0] - operands[1]` or the reverse?).
+**Decision:** replace the array with two named, flat fields on `CalculateRequest`: `Operand1 *float64` (required) and `Operand2 *float64` (optional — required only for binary operations, forbidden for unary ones like `sqrt`). Both are **pointers**, not plain `float64`, specifically so `validate:"required"` checks non-nil rather than non-zero — `go-playground/validator`'s `required` tag treats a value type's zero value (`0.0` for `float64`, also `0` for any int type, `false` for `bool`) as "missing," which is a real bug risk here since `0` is a legitimate operand. A pointer lets `nil` mean "not provided" and a non-nil pointer to `0.0` mean "explicitly zero" — the only way to keep both states distinguishable, since `encoding/json` leaves an omitted key *and* an explicit `null` at the same zero value for a non-pointer field (a plain pointer collapses "omitted" and "explicit null" into the same `nil`, which is fine here — the API has no business distinction between the two for `operand2`).
+**Implementation note:** `operand2`'s arity rule ended up enforced by the **domain layer** (`internal/domain.Calculation.Compute`, which already had to check operand count to safely dereference `Operand2`) rather than by a separate `go-playground/validator` struct-level validator as originally planned. One source of truth instead of two: the DTO/validator layer only checks static shape (`operation` is one of the allowed values, `operand1` is present); whether `operand2` is required for a *given* `operation` is domain knowledge (`Operation.IsUnary`/`IsBinary`), so letting the domain layer own that check avoids duplicating the unary/binary table in two places. The handler still maps the resulting `ErrOperandCountMismatch` to `OPERAND_COUNT_MISMATCH`/400, so the wire contract is unchanged.
+**Rationale for flat over nested (`operands: {operand1, operand2}`):** nesting doesn't fix the pointer/zero-value issue (identical problem regardless of nesting depth) and only pays off with reuse across multiple endpoints, which doesn't exist yet — one endpoint, three total fields, doesn't need internal grouping to stay readable. Named fields also remove the operand-order ambiguity an array had for `subtract`/`divide`.
+**Scope fit:** every operation in [`01-requirements.md`](01-requirements.md) is unary or binary, so a fixed two-operand shape loses no capability today.
+**Revisit if:** an operation ever needs 3+ operands — would require a breaking contract change (`operand3`, or reintroducing an array/variadic shape).
+
+## D12 — Success response does not echo the request
+**Context:** the initial draft had `POST /api/v1/calculate` return `operation`/`operand1`/`operand2` alongside `result`. The usual reasons to do that — self-descriptive responses when inspected in isolation, and convenience when skimming test output — don't hold up well here: the frontend is the only consumer and already has the values it just sent, so echoing is pure duplication of data the caller possesses; the error response already didn't echo (`{"error": {"code","params"}}`), making the original success shape inconsistent with the rest of the contract rather than a deliberate symmetric choice; and traceability is already solved better by `X-Request-Id` (D8), which correlates a response to its request via a lightweight header instead of re-sending the payload.
+**Decision:** `POST /api/v1/calculate` returns only `{ "result": <number> }` on success. Kept as a one-field object, not a bare JSON scalar, so a field can be added later (e.g. `precision`, `rounded`) without a breaking shape change.
+**Rationale:** avoids wasted bandwidth/serialization for data the client already has; matches your stated preference against APIs echoing request data back without a concrete reason to.

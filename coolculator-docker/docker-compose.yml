@@ -1,0 +1,43 @@
+name: coolculator
+
+services:
+  backend:
+    build:
+      context: ../coolculator-backend
+      args:
+        VERSION: ${VERSION:-dev}
+        COMMIT: ${COMMIT:-unknown}
+        BUILD_TIME: ${BUILD_TIME:-unknown}
+    image: coolculator-backend:local
+    container_name: coolculator-backend
+    ports:
+      - "8080:8080"
+    environment:
+      PORT: 8080
+      LOG_LEVEL: info
+      # Must be the frontend's host-facing origin (below), not a Docker
+      # network address — CORS is enforced by the browser, which only ever
+      # sees the host-mapped port.
+      ALLOWED_ORIGINS: http://localhost:8081
+    # No healthcheck override here — the image's own Dockerfile HEALTHCHECK
+    # (GET /health) is what `depends_on: condition: service_healthy` below
+    # actually watches; redeclaring it here would just be duplication.
+
+  frontend:
+    build:
+      context: ../coolculator-ui
+    image: coolculator-ui:local
+    container_name: coolculator-ui
+    ports:
+      - "8081:80"
+    environment:
+      # Deliberately http://localhost:8080, not http://backend:8080: this
+      # value is read by the *browser*, which only ever sees the
+      # host-mapped port — the Docker-internal service name "backend" would
+      # resolve fine from inside this container, but is meaningless to the
+      # user's machine. See coolculator-ui/src/config/env.ts and
+      # docker/docker-entrypoint.d/ for how this reaches the running app.
+      API_BASE_URL: http://localhost:8080
+    depends_on:
+      backend:
+        condition: service_healthy
